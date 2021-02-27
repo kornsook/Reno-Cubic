@@ -38,7 +38,7 @@ for file in files:
 def get_style(i):
     if i == 0:
         return {'color': 'red'}
-    else i == 1:
+    else:
         return {'color': 'blue'}
 
 m.rc('figure', figsize=(34, 12))
