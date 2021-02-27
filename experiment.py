@@ -27,7 +27,7 @@ class Connection:
         self.filter = _filter
     
 
-class BBRExperiment:
+class RenoCubicExperiment:
 
     def __init__(self, client, server, runners):
         self.client = client
@@ -74,6 +74,22 @@ class BBRExperiment:
         self.run_fig5_experiment('bbr')
         self.run_fig5_experiment('cubic')
         
+    def figure_throughput(self):
+        thread = start_capture("{}/capture_packets.pcapng".format(folder))
+
+        num_connections = 5
+        time_each_connection = 0
+        cong = ['reno', 'cubic']
+        connections = self.execute_connections(num_connections, time_each_connection, cong)
+
+        sleep(duration + 15)
+
+        Popen("killall tcpdump", shell=True)
+        thread.join()
+
+        for connection in connections:
+            if connection.filter:
+                filter_capture(connection.filter, "{}/capture_packets.pcapng".format(folder), "{}/connection{}.pcapng".format(folder, connection.id)) 
 
     def figure6(self):
         thread = start_capture("{}/capture_packets.pcapng".format(folder))
@@ -125,13 +141,13 @@ def launchExperiment():
     runners['server']("tc qdisc add dev server-eth0 root fq pacing;")
     runners['server']("sudo ethtool -K server-eth0 gso off tso off gro off;")
 
-    bbrExperiment = BBRExperiment(instance_client, instance_server, runners)
+    renocubicExperiment = RenoCubicExperiment(instance_client, instance_server, runners)
 
-    if(experiment == 'figure5'):
-        bbrExperiment.figure5()
+    if(experiment == 'figure_throughput'):
+        renocubicExperiment.figure_throughput()
     
     elif(experiment == "figure6"):
-        bbrExperiment.figure6()
+        renocubicExperiment.figure6()
 
     net.stop()
 
